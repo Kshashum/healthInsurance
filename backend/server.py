@@ -1,8 +1,10 @@
 
-from flask import Flask, request, jsonify, json
+from flask import Flask, request, jsonify
+from functools import wraps
 from flaskext.mysql import MySQL
-from flask import session
 import configparser
+import bcrypt
+import jwt
 
 app = Flask(__name__)
 
@@ -24,6 +26,20 @@ mysql.init_app(app)
 app.secret_key = 'health++'
 
 
+def loginrequired(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        decoded = jwt.decode(request.json["token"],
+                             "secret", algorithms=["HS256"])
+        print(decoded)
+        try:
+            if decoded['userid'] is not None:
+                return f(*args, **kwargs)
+        except:
+            return jsonify({"msg": "Internal Server Error"}), 500
+    return decorated_function
+
+
 @app.route("/")
 def main():
     return jsonify({"msg": "hello"})
@@ -36,27 +52,33 @@ def users():
         cursor = con.cursor()
         if request.method == "GET":
             email = request.json['email']
-            password = request.json['password']
+            password = request.json['password'].encode('utf-8')
             cursor.execute("SELECT * FROM users WHERE email = %s", (email))
             data = cursor.fetchall()
             if len(data) > 0:
-                if str(data[0][3]) == password:
-                    session['user'] = data[0][0]
-                    return jsonify({"msg": 'user logged in'}), 200
+                if bcrypt.checkpw(password, str(data[0][3]).encode('utf-8')):
+                    token = jwt.encode(
+                        {"userid": data[0][0]}, "secret", algorithm="HS256")
+                    return jsonify({"token": token, "userid": data[0][0], "name": data[0][1]}), 200
                 else:
                     return jsonify({"msg": "wrong password"}), 401
             else:
                 return jsonify({"msg": "wrong email"}), 401
         elif request.method == "POST":
             email = request.json["email"]
-            password = request.json["password"]
+            password = request.json["password"].encode('utf-8')
             name = request.json["name"]
+            hashed = bcrypt.hashpw(password, bcrypt.gensalt())
             cursor.execute("INSERT INTO users(name,email,password) VALUES (%s,%s,%s)",
-                           (name, email, password))
+                           (name, email, hashed))
             data = cursor.fetchall()
             if len(data) == 0:
                 con.commit()
-                return jsonify({"msg": 'user created'}), 200
+                cursor.execute("SELECT * FROM users WHERE email = %s", (email))
+                data = cursor.fetchall()
+                token = jwt.encode(
+                    {"userid": data[0][0]}, "secret", algorithm="HS256")
+                return jsonify({"token": token, "userid": data[0][0], "name": data[0][1]}), 200
             else:
                 return jsonify({"msg": "Internal Server Error"}), 500
     except Exception as e:
@@ -68,6 +90,7 @@ def users():
 
 
 @app.route("/api/v1/dcths", methods=["GET", "POST", "DELETE"])
+@loginrequired
 def dcths():
     try:
         con = mysql.connect()
