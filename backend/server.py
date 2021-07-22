@@ -5,9 +5,11 @@ from flaskext.mysql import MySQL
 import configparser
 import bcrypt
 import jwt
+from flask_cors import CORS
 
 app = Flask(__name__)
-
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 mysql = MySQL()
 cf = configparser.ConfigParser()
 cf.read("./env.config")  # Read configuration file
@@ -44,45 +46,51 @@ def loginrequired(f):
 def main():
     return jsonify({"msg": "hello"})
 
-
-@app.route("/api/v1/users", methods=["GET", "POST"])
+@app.route("/api/v1/users/login", methods=["POST"])
+def login():
+    try:
+        con = mysql.connect()
+        cursor = con.cursor()
+        email = request.json['email']
+        password = request.json['password'].encode('utf-8')
+        cursor.execute("SELECT * FROM users WHERE email = %s", (email))
+        data = cursor.fetchall()
+        if len(data) > 0:
+            if bcrypt.checkpw(password, str(data[0][3]).encode('utf-8')):
+                token = jwt.encode(
+                        {"userid": data[0][0]}, "secret", algorithm="HS256")
+                return jsonify({"token": token, "userid": data[0][0], "name": data[0][1]}), 200
+            else:
+                return jsonify({"msg": "wrong password"}), 401
+        else:
+            return jsonify({"msg": "wrong email"}), 401
+    except Exception as e:
+        return jsonify({"msg": "Internal Server Error"}), 500
+    finally:
+        cursor.close()
+        con.close()
+@app.route("/api/v1/users/signup", methods=["POST"])
 def users():
     try:
         con = mysql.connect()
         cursor = con.cursor()
-        if request.method == "GET":
-            email = request.json['email']
-            password = request.json['password'].encode('utf-8')
+        email = request.json["email"]
+        password = request.json["password"].encode('utf-8')
+        name = request.json["name"]
+        hashed = bcrypt.hashpw(password, bcrypt.gensalt())
+        cursor.execute("INSERT INTO users(name,email,password) VALUES (%s,%s,%s)",
+                           (name, email, hashed))
+        data = cursor.fetchall()
+        if len(data) == 0:
+            con.commit()
             cursor.execute("SELECT * FROM users WHERE email = %s", (email))
             data = cursor.fetchall()
-            if len(data) > 0:
-                if bcrypt.checkpw(password, str(data[0][3]).encode('utf-8')):
-                    token = jwt.encode(
-                        {"userid": data[0][0]}, "secret", algorithm="HS256")
-                    return jsonify({"token": token, "userid": data[0][0], "name": data[0][1]}), 200
-                else:
-                    return jsonify({"msg": "wrong password"}), 401
-            else:
-                return jsonify({"msg": "wrong email"}), 401
-        elif request.method == "POST":
-            email = request.json["email"]
-            password = request.json["password"].encode('utf-8')
-            name = request.json["name"]
-            hashed = bcrypt.hashpw(password, bcrypt.gensalt())
-            cursor.execute("INSERT INTO users(name,email,password) VALUES (%s,%s,%s)",
-                           (name, email, hashed))
-            data = cursor.fetchall()
-            if len(data) == 0:
-                con.commit()
-                cursor.execute("SELECT * FROM users WHERE email = %s", (email))
-                data = cursor.fetchall()
-                token = jwt.encode(
+            token = jwt.encode(
                     {"userid": data[0][0]}, "secret", algorithm="HS256")
-                return jsonify({"token": token, "userid": data[0][0], "name": data[0][1]}), 200
-            else:
-                return jsonify({"msg": "Internal Server Error"}), 500
+            return jsonify({"token": token, "userid": data[0][0], "name": data[0][1]}), 200
+        else:
+            return jsonify({"msg": "Internal Server Error"}), 500
     except Exception as e:
-        print(e)
         return jsonify({"msg": "Internal Server Error"}), 500
     finally:
         cursor.close()
@@ -125,6 +133,7 @@ def dcths():
 
 
 @app.route("/api/v1/visitlist/", methods=['GET', 'POST', 'DELETE'])
+@loginrequired
 def visitlist():
     try:
         con = mysql.connect()
@@ -160,6 +169,7 @@ def visitlist():
 
 
 @app.route("/api/v1/claims", methods=["GET", "POST", "DELETE"])
+@loginrequired
 def claims():
     try:
         con = mysql.connect()

@@ -22,7 +22,13 @@ CREATE TABLE VisitList(
 );
 CREATE TABLE Claims(
     claimid BIGSERIAL PRIMARY KEY,
-    userid uuid REFERENCES Users(userid) ON DELETE CASCADE,
+    userid INT REFERENCES Users(userid) ON DELETE CASCADE,
     dcthsid BIGINT REFERENCES DctHs(dcthsid) ON DELETE CASCADE,
-    price INT,
+    price INT
+);
+CREATE TABLE Transactions(
+    transactionid BIGSERIAL PRIMARY KEY,
+    userid INT REFERENCES Users(userid) ON DELETE CASCADE,
+    dataCreated TIMESTAMP,
+    price INT
 );
