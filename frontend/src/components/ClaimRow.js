@@ -6,7 +6,7 @@ const ClaimRow = (props) => {
     <tr>
       <td>{claimid}</td>
       <td>{dcthsid}</td>
-      <td>{price}</td>
+      <td>${price}</td>
     </tr>
   );
 };

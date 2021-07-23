@@ -3,17 +3,22 @@ import ClaimRow from "../components/ClaimRow";
 import { useStateValue } from "../context/StateContext";
 import axios from "axios";
 import { useHistory } from "react-router-dom";
+import "./Claims.css";
 
 const Claims = () => {
   const history = useHistory();
-  const [{ claimlist, token }, dispatch] = useStateValue();
+  const [{ login, claimlist, token, userid }, dispatch] = useStateValue();
+  if (!login) {
+    history.push("/login");
+  }
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/v1/claims", { token })
+      .get("http://localhost:5000/api/v1/claims", { params: { token, userid } })
       .then((res) => {
         return res.data;
       })
       .then((data) => {
+        console.log(data.claims);
         if (data.claims) {
           dispatch({
             type: "CLAIMS",
@@ -26,22 +31,16 @@ const Claims = () => {
       .catch((err) => {
         console.log(err.message);
       });
-  });
+  }, []);
   const mapper = (item) => {
-    return (
-      <ClaimRow
-        claimid={item.claimid}
-        dcthsid={item.dcthsid}
-        price={item.price}
-      />
-    );
+    return <ClaimRow claimid={item[0]} dcthsid={item[2]} price={item[3]} />;
   };
   const claims = claimlist.map((item) => mapper(item));
   return (
     <div className="main">
       <h3>My Claims</h3>
       <table
-        class="table table-striped"
+        class="table table-striped tb"
         style={{ marginTop: "1%", backgroundColor: "white" }}
       >
         <thead>
@@ -55,7 +54,9 @@ const Claims = () => {
           {claims.length > 0 ? (
             claims
           ) : (
-            <p style={{ alignItems: "center" }}>There are no claims</p>
+            <tr>
+              <td colspan="3">There are no claims</td>
+            </tr>
           )}
         </tbody>
       </table>

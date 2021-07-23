@@ -1,6 +1,7 @@
 export const initialState = {
   login: false,
   visitlist: [],
+  tlist: [],
   token: null,
   name: "",
   userid: "",
@@ -11,6 +12,11 @@ export const initialState = {
 };
 const reducer = (state, action) => {
   switch (action.type) {
+    case "TRANSACTIONS":
+      return {
+        ...state,
+        tlist: action.item,
+      };
     case "CLAIMS":
       return {
         ...state,

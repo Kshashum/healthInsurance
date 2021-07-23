@@ -27,7 +27,7 @@ CREATE TABLE Claims(
     price INT
 );
 CREATE TABLE Transactions(
-    transactionid BIGSERIAL PRIMARY KEY,
+    transactionid SERIAL PRIMARY KEY,
     userid INT REFERENCES Users(userid) ON DELETE CASCADE,
     dataCreated TIMESTAMP,
     price INT
