@@ -132,17 +132,18 @@ def dcths():
         con.close()
 
 
-@app.route("/api/v1/visitlist/", methods=['GET', 'POST', 'DELETE'])
+@app.route("/api/v1/visitlist/", methods=['GET', 'POST'])
 def visitlist():
     try:
         con = mysql.connect()
         cursor = con.cursor()
+        print(request)
         if request.method == 'GET':
             userid = request.args.get("userid")
             cursor.execute(
-                "SELECT * FROM VisitList WHERE userid = %s", (userid))
+                "SELECT * FROM VisitList v INNER JOIN DctHs d ON d.dcthsid = v.dcthsid  WHERE v.userid = %s", (userid))
             data = cursor.fetchall()
-            return jsonify(data), 200
+            return jsonify({"vlist":data}), 200
         elif request.method == "POST":
             userid = request.json["userid"]
             dcthsid = request.json["dcthsid"]
@@ -151,15 +152,35 @@ def visitlist():
             data = cursor.fetchall()
             if len(data) == 0:
                 con.commit()
-                return {"msg": "Doctor Hospital Created"}, 201
-        elif request.method == 'DELETE':
-            dcthsid = request.json["dcthsid"]
-            userid = request.json["userid"]
+                return jsonify({"msg": "Added to the list"}), 201
+        else:
+            dcthsid = request.args.get("dcthsid")
+            userid = request.args.get("userid")
+            print(dcthsid,userid)
             cursor.execute(
-                "DELETE FROM DctHs WHERE dcthsid=%s AND userid=%s", (dcthsid, userid))
+                "DELETE FROM VisitList WHERE dcthsid=%s AND userid=%s", (dcthsid, userid))
             data = cursor.fetchall()
             if len(data) == 0:
-                return jsonify({"msg": "deleted Doctor Hospital"}), 200
+                return jsonify({"msg": "deleted item from the list"}), 200
+    except:
+        return jsonify({"msg": "Internal Server Error"}), 500
+    finally:
+        cursor.close()
+        con.close()
+@app.route("/api/v1/visitlist/delete", methods=['GET'])
+def deletevisitlist():
+    try:
+        con = mysql.connect()
+        cursor = con.cursor()
+        dcthsid = request.args.get("dcthsid")
+        userid = request.args.get("userid")
+        print(dcthsid,userid)
+        cursor.execute(
+                "DELETE FROM VisitList WHERE dcthsid=%s AND userid=%s", (dcthsid, userid))
+        data = cursor.fetchall()
+        if len(data) == 0:
+            con.commit()
+            return jsonify({"msg": "deleted item from the list"}), 200
     except:
         return jsonify({"msg": "Internal Server Error"}), 500
     finally:

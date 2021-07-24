@@ -5,7 +5,7 @@ import { TextField, makeStyles } from "@material-ui/core";
 import logo from "../logo.png";
 import { useStateValue } from "../context/StateContext";
 const Navbar = () => {
-  const [{ login, name }, dispatch] = useStateValue();
+  const [{ login, name, vlist }, dispatch] = useStateValue();
   const useStyles = makeStyles(() => ({
     root: {
       marginLeft: "10px",
@@ -79,7 +79,9 @@ const Navbar = () => {
         <div className="navbar_options">
           <span className="navbar_optionslineone">Visit List</span>
           <Link to="/visitlist" className="navbar_shoppingcart">
-            <p className="navbar_optionslinetwo navbar_cartcount">0</p>
+            <p className="navbar_optionslinetwo navbar_cartcount">
+              {vlist.length}
+            </p>
           </Link>
         </div>
       </div>

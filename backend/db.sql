@@ -16,9 +16,11 @@ CREATE TABLE DctHs(
     Price INT
 );
 CREATE TABLE VisitList(
-    dcthsid BIGSERIAL PRIMARY KEY,
+    vlistid SERIAL,
+    dcthsid INT REFERENCES DctHs(dcthsid),
     userid INT REFERENCES Users(userid) ON DELETE CASCADE,
-    dataCreated TIMESTAMP
+    dataCreated TIMESTAMP,
+    PRIMARY KEY(dcthsid,userid)
 );
 CREATE TABLE Claims(
     claimid BIGSERIAL PRIMARY KEY,

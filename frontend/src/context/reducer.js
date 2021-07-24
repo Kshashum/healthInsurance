@@ -1,6 +1,6 @@
 export const initialState = {
   login: false,
-  visitlist: [],
+  vlist: [],
   tlist: [],
   token: null,
   name: "",
@@ -12,6 +12,16 @@ export const initialState = {
 };
 const reducer = (state, action) => {
   switch (action.type) {
+    case "REMOVEVLIST":
+      return {
+        ...state,
+        vlist: state.vlist.filter((item) => item[0] != action.item),
+      };
+    case "VLIST":
+      return {
+        ...state,
+        vlist: action.item,
+      };
     case "TRANSACTIONS":
       return {
         ...state,
@@ -39,7 +49,7 @@ const reducer = (state, action) => {
         login: false,
         claimlist: [],
         searchlist: [],
-        visitlist: [],
+        vlist: [],
       };
     default:
       return state;
