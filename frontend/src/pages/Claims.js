@@ -33,7 +33,14 @@ const Claims = () => {
       });
   }, []);
   const mapper = (item) => {
-    return <ClaimRow claimid={item[0]} dcthsid={item[2]} price={item[3]} />;
+    return (
+      <ClaimRow
+        key={item[0]}
+        claimid={item[0]}
+        dcthsid={item[2]}
+        price={item[3]}
+      />
+    );
   };
   const claims = claimlist.map((item) => mapper(item));
   return (
@@ -45,9 +52,9 @@ const Claims = () => {
       >
         <thead>
           <tr>
-            <th scope="col">Claim Id</th>
-            <th scope="col">{`Doctor & Hospital Id`}</th>
-            <th scope="col">Price</th>
+            <th>Claim Id</th>
+            <th>{`Doctor & Hospital Id`}</th>
+            <th>Price</th>
           </tr>
         </thead>
         <tbody>
@@ -55,7 +62,7 @@ const Claims = () => {
             claims
           ) : (
             <tr>
-              <td colspan="3">There are no claims</td>
+              <td colSpan="3">There are no claims</td>
             </tr>
           )}
         </tbody>

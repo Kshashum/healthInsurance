@@ -7,11 +7,48 @@ export const initialState = {
   userid: "",
   claimlist: [],
   searchlist: [],
+  gte: 0,
+  lte: 400,
+  ord: "",
+  price100_200: 0,
+  price200_300: 0,
+  price300_500: 0,
   clickSearch: false,
-  cartid: "",
 };
 const reducer = (state, action) => {
   switch (action.type) {
+    case "ADD_VLIST":
+      console.log(action.item);
+      const temp = [...state.vlist];
+      temp.push(action.item);
+      return {
+        ...state,
+        vlist: temp,
+      };
+    case "DO_SEARCH":
+      return {
+        ...state,
+        clickSearch: !state.clickSearch,
+      };
+    case "SORT":
+      return {
+        ...state,
+        ord: action.item,
+      };
+    case "SEARCH":
+      return {
+        ...state,
+        searchlist: action.item.searchlist,
+        price100_200: action.item.price100_200,
+        price200_300: action.item.price200_300,
+        price300_500: action.item.price300_500,
+      };
+    case "ADD_FILTER":
+      return {
+        ...state,
+        gte: action.item.gte,
+        lte: action.item.lte,
+      };
     case "REMOVEVLIST":
       return {
         ...state,

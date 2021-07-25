@@ -35,6 +35,7 @@ const VisitList = () => {
   const mapper = (item) => {
     return (
       <VRow
+        key={item[0]}
         dcthsid={item[1]}
         name={item[5]}
         address={item[7] + " " + item[8]}
@@ -54,12 +55,12 @@ const VisitList = () => {
       >
         <thead>
           <tr>
-            <th scope="col">DctHsid</th>
-            <th scope="col">Name</th>
-            <th scope="col">Address</th>
-            <th scope="col">Phone</th>
-            <th scope="col">Time</th>
-            <th scope="col"></th>
+            <th>DctHsid</th>
+            <th>Name</th>
+            <th>Address</th>
+            <th>Phone</th>
+            <th>Time</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -67,7 +68,7 @@ const VisitList = () => {
             visitlist
           ) : (
             <tr>
-              <td colspan="3">There are no items in visitlist</td>
+              <td colSpan="3">There are no items in visitlist</td>
             </tr>
           )}
         </tbody>

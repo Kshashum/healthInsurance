@@ -69,8 +69,8 @@ const Account = () => {
       <table className="table table-bordered tb">
         <thead>
           <tr>
-            <th scope="col">Date</th>
-            <th scope="col">Price</th>
+            <th>Date</th>
+            <th>Price</th>
           </tr>
         </thead>
         <tbody>
@@ -78,7 +78,7 @@ const Account = () => {
             transactions
           ) : (
             <tr>
-              <td colspan="3">There are no transactions</td>
+              <td colSpan="3">There are no transactions</td>
             </tr>
           )}
         </tbody>

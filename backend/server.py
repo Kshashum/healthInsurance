@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
-from functools import wraps
+from functools import wraps,reduce
 from flaskext.mysql import MySQL
+from elasticsearch import Elasticsearch
 import configparser
 import bcrypt
 import jwt
@@ -24,8 +25,52 @@ app.config['MYSQL_DATABASE_DB'] = _database
 app.config['MYSQL_DATABASE_HOST'] = _host
 app.config['MYSQL_DATABASE_PORT'] = int(_port)
 mysql.init_app(app)
+es = Elasticsearch([{'host': "localhost", 'port': 9200}], timeout=30)
 app.secret_key = 'health++'
 
+def mapper(item):
+    if item:
+        return [{
+            '_index': 'dcths',
+            "dcthsid":item[0],
+            "name":item[1],
+            "phone":item[2],
+            "state":item[3],
+            "city":item[4],
+            "price":item[5]
+        }]
+from elasticsearch import helpers
+def ingestdata():
+    try:
+        con = mysql.connect()
+        cursor = con.cursor()
+        cursor.execute("SELECT * FROM DctHs")
+        data = list(cursor.fetchall())
+        res=map(mapper,data)
+        res=reduce(lambda x,y : x+y,res)
+        doc={
+          "mappings": {
+            "properties": {
+              "dcthsid": { "type": 'integer' },
+              "name": { "type": 'keyword' },
+              "phone": { "type": 'integer' },
+              "city": { "type": 'keyword' },
+              "state": { "type": 'keyword' },
+              "Price": { "type": 'integer' }
+            }
+          }
+        }
+        es.indices.delete(index="dcths")
+        print("deleted the index")
+        es.indices.create(index='dcths',body=doc)
+        resp = helpers.bulk(es, res, chunk_size=1000, request_timeout=200)
+        print("created index")
+
+    except Exception as e:
+        print(e)
+    finally:
+        cursor.close()
+        con.close()
 
 def loginrequired(f):
     @wraps(f)
@@ -44,6 +89,7 @@ def loginrequired(f):
 
 @app.route("/")
 def main():
+    ingestdata()
     return jsonify({"msg": "hello"})
 
 @app.route("/api/v1/users/login", methods=["POST"])
@@ -133,11 +179,11 @@ def dcths():
 
 
 @app.route("/api/v1/visitlist/", methods=['GET', 'POST'])
+@loginrequired
 def visitlist():
     try:
         con = mysql.connect()
         cursor = con.cursor()
-        print(request)
         if request.method == 'GET':
             userid = request.args.get("userid")
             cursor.execute(
@@ -153,21 +199,14 @@ def visitlist():
             if len(data) == 0:
                 con.commit()
                 return jsonify({"msg": "Added to the list"}), 201
-        else:
-            dcthsid = request.args.get("dcthsid")
-            userid = request.args.get("userid")
-            print(dcthsid,userid)
-            cursor.execute(
-                "DELETE FROM VisitList WHERE dcthsid=%s AND userid=%s", (dcthsid, userid))
-            data = cursor.fetchall()
-            if len(data) == 0:
-                return jsonify({"msg": "deleted item from the list"}), 200
-    except:
+    except Exception as e:
+        print(e)
         return jsonify({"msg": "Internal Server Error"}), 500
     finally:
         cursor.close()
         con.close()
 @app.route("/api/v1/visitlist/delete", methods=['GET'])
+@loginrequired
 def deletevisitlist():
     try:
         con = mysql.connect()
@@ -260,6 +299,58 @@ def transactions():
     finally:
         cursor.close()
         con.close()
+
+@app.route("/api/v1/search",methods=["GET"])
+def search():
+    query = request.args.get("query")
+    gte = request.args.get("gte")
+    lte = request.args.get("lte")
+    ord = request.args.get("ord")
+    print(query,gte,lte,ord)
+    rp = es.search(index='dcths',
+        body={
+            "aggs": {
+            "Price_Filter": {
+              "range": {
+                "field": "price",
+                "ranges": [
+                  {
+                    "from": 100,
+                    "to": 200
+                  },
+                  {
+                    "from": 200,
+                    "to": 300
+                  },
+                  {
+                    "from": 300,
+                    "to": 400
+                  }                  
+                ]
+              }
+            }
+          },
+          "query":{
+            "bool": {
+              "filter": [
+                {"range": {
+                  "price": {
+                    "gte": gte,
+                    "lte": lte
+                  }
+                }}
+              ], 
+              "must": [
+                {"multi_match": {
+                  "query": query,
+                  "fields": ["name","city","state"]
+                }}
+              ],
+            } 
+          }
+        }
+    )
+    return jsonify(rp),200
 
 
 if __name__ == "__main__":
