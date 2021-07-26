@@ -18,7 +18,6 @@ const Claims = () => {
         return res.data;
       })
       .then((data) => {
-        console.log(data.claims);
         if (data.claims) {
           dispatch({
             type: "CLAIMS",

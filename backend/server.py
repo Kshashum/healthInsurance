@@ -187,14 +187,17 @@ def visitlist():
         if request.method == 'GET':
             userid = request.args.get("userid")
             cursor.execute(
-                "SELECT * FROM VisitList v INNER JOIN DctHs d ON d.dcthsid = v.dcthsid  WHERE v.userid = %s", (userid))
+                "SELECT * FROM VisitList v INNER JOIN DctHs d ON d.dcthsid = v.dcthsid  WHERE v.userid = %s and v.del=0", (userid))
             data = cursor.fetchall()
             return jsonify({"vlist":data}), 200
         elif request.method == "POST":
             userid = request.json["userid"]
             dcthsid = request.json["dcthsid"]
-            cursor.execute("INSERT INTO VisitList(userid, dcthsid) VALUES (%s,%s)",
-                           (userid, dcthsid))
+            cursor.execute(
+                "DELETE FROM VisitList WHERE dcthsid=%s AND userid=%s", (dcthsid, userid))
+            cursor.fetchall()
+            cursor.execute("INSERT INTO VisitList(userid, dcthsid,del) VALUES (%s,%s,%s)",
+                           (userid, dcthsid,0))
             data = cursor.fetchall()
             if len(data) == 0:
                 con.commit()
@@ -215,7 +218,7 @@ def deletevisitlist():
         userid = request.args.get("userid")
         print(dcthsid,userid)
         cursor.execute(
-                "DELETE FROM VisitList WHERE dcthsid=%s AND userid=%s", (dcthsid, userid))
+                "UPDATE VisitList SET del=1 WHERE dcthsid=%s AND userid=%s", (dcthsid, userid))
         data = cursor.fetchall()
         if len(data) == 0:
             con.commit()
@@ -277,7 +280,6 @@ def transactions():
             data = list(cursor.fetchall())
             return jsonify({"transactions":data}), 200
         elif request.method == "POST":
-            print("hi")
             userid = request.json["userid"]
             price = request.json["price"]
             cursor.execute("INSERT INTO Transactions(userid,price) VALUES (%s,%s)",

@@ -38,7 +38,6 @@ const Navbar = () => {
     }
     if (search) {
       try {
-        console.log(search);
         axios
           .get("http://localhost:5000/api/v1/search", {
             params: { query: search, gte, lte, ord },

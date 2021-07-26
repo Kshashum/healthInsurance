@@ -20,6 +20,7 @@ CREATE TABLE VisitList(
     dcthsid INT REFERENCES DctHs(dcthsid),
     userid INT REFERENCES Users(userid) ON DELETE CASCADE,
     dataCreated TIMESTAMP,
+    del BOOLEAN,
     PRIMARY KEY(dcthsid,userid)
 );
 CREATE TABLE Claims(

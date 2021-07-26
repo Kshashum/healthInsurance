@@ -18,7 +18,6 @@ export const initialState = {
 const reducer = (state, action) => {
   switch (action.type) {
     case "ADD_VLIST":
-      console.log(action.item);
       const temp = [...state.vlist];
       temp.push(action.item);
       return {

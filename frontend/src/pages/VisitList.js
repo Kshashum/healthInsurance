@@ -37,9 +37,9 @@ const VisitList = () => {
       <VRow
         key={item[0]}
         dcthsid={item[1]}
-        name={item[5]}
-        address={item[7] + " " + item[8]}
-        phone={item[6]}
+        name={item[6]}
+        address={item[8] + " " + item[9]}
+        phone={item[7]}
         time={item[3]}
         vlistid={item[0]}
       />
@@ -68,7 +68,7 @@ const VisitList = () => {
             visitlist
           ) : (
             <tr>
-              <td colSpan="3">There are no items in visitlist</td>
+              <td colSpan="6">There are no items in visitlist</td>
             </tr>
           )}
         </tbody>
