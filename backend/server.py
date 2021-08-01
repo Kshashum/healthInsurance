@@ -307,8 +307,6 @@ def search():
     query = request.args.get("query")
     gte = request.args.get("gte")
     lte = request.args.get("lte")
-    ord = request.args.get("ord")
-    print(query,gte,lte,ord)
     rp = es.search(index='dcths',
         body={
             "aggs": {

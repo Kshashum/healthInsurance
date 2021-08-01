@@ -92,11 +92,11 @@ const Navbar = () => {
       }
     }
     history.push("/s");
-    setsearch("");
   };
   useEffect(() => {
     if (clickSearch) {
       handleSearch(null);
+      dispatch({ type: "DO_SEARCH" });
     }
   }, [clickSearch]);
   return (

@@ -9,7 +9,6 @@ export const initialState = {
   searchlist: [],
   gte: 0,
   lte: 400,
-  ord: "",
   price100_200: 0,
   price200_300: 0,
   price300_500: 0,
@@ -28,11 +27,6 @@ const reducer = (state, action) => {
       return {
         ...state,
         clickSearch: !state.clickSearch,
-      };
-    case "SORT":
-      return {
-        ...state,
-        ord: action.item,
       };
     case "SEARCH":
       return {

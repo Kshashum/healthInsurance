@@ -10,29 +10,31 @@ const Account = () => {
   const history = useHistory();
   const [price, setPrice] = useState(0);
   const [clk, setClk] = useState(false);
-  const [{ tlist, token, userid, login }, dispatch] = useStateValue();
+  const [{ tlist, token, userid, login, name }, dispatch] = useStateValue();
   if (!login) {
     history.push("/login");
   }
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/v1/transactions", {
-        params: { token, userid },
-      })
-      .then((res) => {
-        return res.data;
-      })
-      .then((data) => {
-        if (data.transactions) {
-          dispatch({
-            type: "TRANSACTIONS",
-            item: data.transactions,
-          });
-        }
-      })
-      .catch((err) => {
-        console.log(err.message);
-      });
+    if (login) {
+      axios
+        .get("http://localhost:5000/api/v1/transactions", {
+          params: { token, userid },
+        })
+        .then((res) => {
+          return res.data;
+        })
+        .then((data) => {
+          if (data.transactions) {
+            dispatch({
+              type: "TRANSACTIONS",
+              item: data.transactions,
+            });
+          }
+        })
+        .catch((err) => {
+          console.log(err.message);
+        });
+    }
   }, [clk]);
   const mapper = (item) => {
     return <AccountRow date={item[2]} price={item[3]} />;
@@ -63,8 +65,13 @@ const Account = () => {
       });
   };
   return (
-    <div className="main">
+    <div className="md">
       <h3>My Account</h3>
+      <div className="ai">
+        <h5>Account Information</h5>
+        <h6>Name: {name}</h6>
+        <h6>Userid: {userid}</h6>
+      </div>
       <h5>History</h5>
       <table className="table table-bordered tb">
         <thead>

@@ -31,6 +31,7 @@ const Admin = () => {
             </Button>
           </div>
           <div className="right">
+            <TextField placeholder="claimid"></TextField>
             <Button
               variant="contained"
               color="secondary"

@@ -11,36 +11,78 @@ const Signup = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState({});
   const history = useHistory();
   useEffect(() => {
     if (login) {
       history.push("/");
     }
   }, [login, history]);
+  const validate = () => {
+    let errors = {};
+    let isValid = true;
+    if (name.length === 0) {
+      isValid = false;
+      errors["name"] = "please enter your name";
+    }
+    if (email.length === 0) {
+      isValid = false;
+      errors["email"] = "Please enter your email Address.";
+    }
+    if (email.length > 0) {
+      var pattern = new RegExp(
+        /^(("[\w-\s]+")|([\w-]+(?:\.[\w-]+)*)|("[\w-\s]+")([\w-]+(?:\.[\w-]+)*))(@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$)|(@\[?((25[0-5]\.|2[0-4][0-9]\.|1[0-9]{2}\.|[0-9]{1,2}\.))((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\.){2}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[0-9]{1,2})\]?$)/i
+      );
+
+      if (!pattern.test(email)) {
+        isValid = false;
+        errors["email"] = "Please enter valid email address.";
+      }
+    }
+
+    if (password.length === 0) {
+      isValid = false;
+      errors["password"] = "Please enter your password.";
+    }
+    if (password.length > 0) {
+      var pattern2 = new RegExp(
+        /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/i
+      );
+      if (!pattern2.test(password)) {
+        isValid = false;
+        errors["password"] =
+          "Password should have minimum eight characters, at least one letter, one number and one special character";
+      }
+    }
+    setErrors(errors);
+    return isValid;
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await axios
-      .post("http://localhost:5000/api/v1/users/signup", {
-        name,
-        email,
-        password,
-      })
-      .then((res) => {
-        return res.data;
-      })
-      .then((data) => {
-        dispatch({
-          type: "AUTHORIZE",
-          item: {
-            token: data.token,
-            userid: data.userid,
-            name: data.name,
-          },
+    if (validate()) {
+      await axios
+        .post("http://localhost:5000/api/v1/users/signup", {
+          name,
+          email,
+          password,
+        })
+        .then((res) => {
+          return res.data;
+        })
+        .then((data) => {
+          dispatch({
+            type: "AUTHORIZE",
+            item: {
+              token: data.token,
+              userid: data.userid,
+              name: data.name,
+            },
+          });
+        })
+        .catch((err) => {
+          console.log(err.message);
         });
-      })
-      .catch((err) => {
-        console.log(err.message);
-      });
+    }
   };
 
   return (
@@ -62,6 +104,7 @@ const Signup = () => {
                 setName(e.target.value);
               }}
             ></TextField>
+            <div className="text-danger">{errors["name"]}</div>
             <Typography variant="h6" style={{ marginTop: "5px" }}>
               Email
             </Typography>
@@ -75,6 +118,7 @@ const Signup = () => {
                 setEmail(e.target.value);
               }}
             ></TextField>
+            <div className="text-danger">{errors["email"]}</div>
             <Typography variant="h6" style={{ marginTop: "5px" }}>
               Password
             </Typography>
@@ -87,6 +131,7 @@ const Signup = () => {
               }}
               style={{ marginTop: "5px" }}
             ></TextField>
+            <div className="text-danger">{errors["password"]}</div>
             <Button
               style={{
                 backgroundColor: "#f0c14b",

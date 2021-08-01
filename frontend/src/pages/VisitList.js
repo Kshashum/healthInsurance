@@ -11,26 +11,28 @@ const VisitList = () => {
     history.push("/login");
   }
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/v1/visitlist", {
-        params: { token, userid },
-      })
-      .then((res) => {
-        return res.data;
-      })
-      .then((data) => {
-        if (data.vlist) {
-          dispatch({
-            type: "VLIST",
-            item: data.vlist,
-          });
-        } else {
-          history.push("/");
-        }
-      })
-      .catch((err) => {
-        console.log(err.message);
-      });
+    if (login) {
+      axios
+        .get("http://localhost:5000/api/v1/visitlist", {
+          params: { token, userid },
+        })
+        .then((res) => {
+          return res.data;
+        })
+        .then((data) => {
+          if (data.vlist) {
+            dispatch({
+              type: "VLIST",
+              item: data.vlist,
+            });
+          } else {
+            history.push("/");
+          }
+        })
+        .catch((err) => {
+          console.log(err.message);
+        });
+    }
   }, []);
   const mapper = (item) => {
     return (

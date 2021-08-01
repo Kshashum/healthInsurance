@@ -2,6 +2,7 @@ import { React, useState } from "react";
 import "./Search.css";
 import { useStateValue } from "../context/StateContext";
 import { useHistory } from "react-router-dom";
+import ReactPaginate from "react-paginate";
 import {
   Checkbox,
   FormControlLabel,
@@ -15,12 +16,19 @@ const Search = () => {
     { searchlist, price100_200, price200_300, price300_500, login },
     dispatch,
   ] = useStateValue();
+  const handlePageClick = (e) => {
+    const selectedPage = e.selected;
+    setOffset(selectedPage * perPage);
+  };
   const history = useHistory();
   const [facet1, setFacet1] = useState(false);
   const [facet2, setFacet2] = useState(false);
   const [facet3, setFacet3] = useState(false);
-  const [facet4, setFacet4] = useState(false);
-  const [facet5, setFacet5] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const [perPage] = useState(5);
+  const [pageCount] = useState(
+    searchlist.length > 0 ? searchlist.length / perPage : 0
+  );
   if (!login) {
     history.push("/login");
   }
@@ -49,20 +57,6 @@ const Search = () => {
         type: "ADD_FILTER",
         item: { gte: 300, lte: 500 },
       });
-    } else if (e.target.name === "asc") {
-      setFacet4(true);
-      setFacet5(false);
-      dispatch({
-        type: "SORT",
-        item: "asc",
-      });
-    } else {
-      setFacet4(false);
-      setFacet5(true);
-      dispatch({
-        type: "SORT",
-        item: "desc",
-      });
     }
   };
   const mapper = (item) => {
@@ -78,7 +72,8 @@ const Search = () => {
       />
     );
   };
-  const searchitems = searchlist.map((item) => mapper(item));
+  const data = searchlist.slice(offset, offset + perPage);
+  const searchitems = data.map((item) => mapper(item));
   return (
     <div className="search">
       <div className="search_left">
@@ -116,29 +111,6 @@ const Search = () => {
               />
             }
             label={`300 to 500 (${price300_500})`}
-          />
-          <Typography variant="h6" style={{ marginTop: "3px" }}>
-            Sort
-          </Typography>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={facet4}
-                onChange={(e) => handleChange(e)}
-                name="asc"
-              />
-            }
-            label="Asc"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={facet5}
-                onChange={(e) => handleChange(e)}
-                name="desc"
-              />
-            }
-            label="Dsc"
           />
           <Button
             type="submit"
@@ -185,6 +157,19 @@ const Search = () => {
             </tbody>
           </table>
         </div>
+        <ReactPaginate
+          previousLabel={"prev"}
+          nextLabel={"next"}
+          breakLabel={"..."}
+          breakClassName={"break-me"}
+          pageCount={pageCount}
+          onPageChange={handlePageClick}
+          marginPagesDisplayed={2}
+          pageRangeDisplayed={5}
+          containerClassName={"pagination"}
+          subContainerClassName={"pages pagination"}
+          activeClassName={"active"}
+        />
       </div>
     </div>
   );

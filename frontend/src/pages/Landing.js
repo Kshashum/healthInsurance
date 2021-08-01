@@ -6,7 +6,7 @@ const Landing = () => {
   return (
     <div>
       <div className="main background">
-        <h1>The Health Insurance Company!!</h1>
+        <h1>The Health Insurance Company</h1>
         <p
           style={{
             marginTop: "10px",

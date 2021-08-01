@@ -12,24 +12,28 @@ const Claims = () => {
     history.push("/login");
   }
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/v1/claims", { params: { token, userid } })
-      .then((res) => {
-        return res.data;
-      })
-      .then((data) => {
-        if (data.claims) {
-          dispatch({
-            type: "CLAIMS",
-            item: data.claims,
-          });
-        } else {
-          history.push("/");
-        }
-      })
-      .catch((err) => {
-        console.log(err.message);
-      });
+    if (login) {
+      axios
+        .get("http://localhost:5000/api/v1/claims", {
+          params: { token, userid },
+        })
+        .then((res) => {
+          return res.data;
+        })
+        .then((data) => {
+          if (data.claims) {
+            dispatch({
+              type: "CLAIMS",
+              item: data.claims,
+            });
+          } else {
+            history.push("/");
+          }
+        })
+        .catch((err) => {
+          console.log(err.message);
+        });
+    }
   }, []);
   const mapper = (item) => {
     return (
@@ -46,7 +50,7 @@ const Claims = () => {
     <div className="main">
       <h3>My Claims</h3>
       <table
-        class="table table-striped tb"
+        className="table table-striped tb"
         style={{ marginTop: "1%", backgroundColor: "white" }}
       >
         <thead>
