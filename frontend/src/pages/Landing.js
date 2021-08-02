@@ -25,9 +25,9 @@ const Landing = () => {
                 <h4 className="card-title">Basic</h4>
                 <ul className="card-text">
                   <li>CoInsurance PPO: 50%</li>
-                  <li>Emergency Room Copay: 100$</li>
+                  <li>Emergency Room Copay: 180$</li>
                   <li>Family Deductable: $700</li>
-                  <li>Urgent Care Copay: $25</li>
+                  <li>Urgent Care Copay: $40</li>
                   <li>Individual Out of Pocket Maximum: $9000</li>
                 </ul>
               </div>
@@ -48,9 +48,9 @@ const Landing = () => {
               <div className="card-body">
                 <h4 className="card-title">Premium Plus</h4>
                 <li>CoInsurance PPO: 80%</li>
-                <li>Emergency Room Copay: 180$</li>
+                <li>Emergency Room Copay: 120$</li>
                 <li>Family Deductable: $1500</li>
-                <li>Urgent Care Copay: $40</li>
+                <li>Urgent Care Copay: $25</li>
                 <li>Individual Out of Pocket Maximum: $5200</li>
               </div>
             </div>
