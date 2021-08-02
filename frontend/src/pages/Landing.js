@@ -79,6 +79,12 @@ const Landing = () => {
             </ul>
           </div>
         </div>
+        <Link
+          to="/adminlogin"
+          style={{ marginTop: "10px", alignItems: "center" }}
+        >
+          <Button variant="contained">Admin</Button>
+        </Link>
       </div>
     </div>
   );

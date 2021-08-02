@@ -3,6 +3,7 @@ import "./App.css";
 import Navbar from "./components/Navbar";
 import Account from "./pages/Account";
 import Admin from "./pages/Admin";
+import AdminLogin from "./pages/AdminLogin";
 import Claims from "./pages/Claims";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
@@ -40,6 +41,9 @@ function App() {
           </Route>
           <Route path="/account">
             <Account />
+          </Route>
+          <Route path="/adminlogin">
+            <AdminLogin />
           </Route>
           <Route path="/">
             <Landing />

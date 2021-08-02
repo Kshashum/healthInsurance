@@ -52,7 +52,7 @@ const VisitList = () => {
     <div className="main">
       <h3>Visit List</h3>
       <table
-        class="table table-striped tb"
+        className="table table-striped tb"
         style={{ marginTop: "1%", backgroundColor: "white" }}
       >
         <thead>

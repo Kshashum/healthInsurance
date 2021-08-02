@@ -1,5 +1,6 @@
 export const initialState = {
   login: false,
+  admin: false,
   vlist: [],
   tlist: [],
   token: null,
@@ -70,6 +71,14 @@ const reducer = (state, action) => {
         name: action.item.name,
         userid: action.item.userid,
       };
+    case "ADMIN":
+      return {
+        ...state,
+        admin: true,
+        login: true,
+        name: "admin",
+        token: action.item.token,
+      };
     case "LOGOUT":
       return {
         ...state,
@@ -80,6 +89,7 @@ const reducer = (state, action) => {
         claimlist: [],
         searchlist: [],
         vlist: [],
+        admin: false,
       };
     default:
       return state;

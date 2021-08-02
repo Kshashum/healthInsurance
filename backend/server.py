@@ -115,6 +115,24 @@ def login():
     finally:
         cursor.close()
         con.close()
+@app.route("/api/v1/users/adminlogin", methods=["POST"])
+def adminlogin():
+    try:
+        con = mysql.connect()
+        cursor = con.cursor()
+        email = request.json['email']
+        password = request.json['password']
+        print(email,password)
+        if email=="admin@gmail.com" and password == "admin1234$":
+            token = jwt.encode({"userid": "admin"}, "secret", algorithm="HS256")
+            return jsonify({"token": token}), 200
+        else:
+            return jsonify({"msg": "wrong email or password"}), 401
+    except Exception as e:
+        return jsonify({"msg": "Internal Server Error"}), 500
+    finally:
+        cursor.close()
+        con.close()
 @app.route("/api/v1/users/signup", methods=["POST"])
 def users():
     try:
@@ -141,9 +159,40 @@ def users():
     finally:
         cursor.close()
         con.close()
+@app.route("/api/v1/dcths/dp", methods=["GET", "POST"])
+@loginrequired
+def dpdcths():
+    try:
+        con = mysql.connect()
+        cursor = con.cursor()
+        if request.method == 'GET':
+            dcthsid = request.args.get("dcthsid")
+            cursor.execute("DELETE FROM DctHs WHERE dcthsid=%s", (dcthsid))
+            data = cursor.fetchall()
+            if len(data) == 0:
+                con.commit()
+                return jsonify({"msg": "deleted Doctor Hospital"}), 204
+        elif request.method == "POST":
+            name = request.json["name"]
+            phone = request.json["phone"]
+            state = request.json["state"]
+            city = request.json["city"]
+            price = request.json["price"]
+            dcthsid = request.json["dcthsid"]
+            cursor.execute("UPDATE DctHs SET name=%s,phone=%s,state=%s,city=%s,price=%s WHERE dcthsid=%s",(name,phone,state,city,price,dcthsid))
+            data = cursor.fetchall()
+            if len(data) == 0:
+                con.commit()
+                return jsonify({"msg": "Doctor Hospital Updated"}), 204
+    except Exception as e:
+        print(e)
+        return jsonify({"msg": "Internal Server Error"}), 500
+    finally:
+        cursor.close()
+        con.close()
 
 
-@app.route("/api/v1/dcths", methods=["GET", "POST", "DELETE"])
+@app.route("/api/v1/dcths", methods=["GET", "POST"])
 @loginrequired
 def dcths():
     try:
@@ -158,20 +207,15 @@ def dcths():
             phone = request.json["phone"]
             state = request.json["state"]
             city = request.json["city"]
-            price = request.json["city"]
+            price = request.json["price"]
             cursor.execute("INSERT INTO DctHs(name, phone, state, city, price) VALUES (%s,%s,%s,%s,%s)",
                            (name, phone, state, city, price))
             data = cursor.fetchall()
             if len(data) == 0:
                 con.commit()
                 return jsonify({"msg": "Doctor Hospital Created"}), 201
-        elif request.method == 'DELETE':
-            dcthsid = request.json["dcthsid"]
-            cursor.execute("DELETE FROM DctHs WHERE dcthsid=%s", (dcthsid))
-            data = cursor.fetchall()
-            if len(data) == 0:
-                return jsonify({"msg": "deleted Doctor Hospital"}), 200
-    except:
+    except Exception as e:
+        print(e)
         return jsonify({"msg": "Internal Server Error"}), 500
     finally:
         cursor.close()
@@ -230,7 +274,38 @@ def deletevisitlist():
         con.close()
 
 
-@app.route("/api/v1/claims", methods=["GET", "POST", "DELETE"])
+@app.route("/api/v1/claims/dp", methods=["GET","POST"])
+@loginrequired
+def dpclaims():
+    try:
+        con = mysql.connect()
+        cursor = con.cursor()
+        if request.method == 'GET':
+            claimid = request.args.get("claimid")
+            cursor.execute(
+                "DELETE FROM Claims WHERE claimid=%s", (claimid))
+            data = cursor.fetchall()
+            if len(data) == 0:
+                con.commit()
+                return jsonify({"msg": "deleted claim"}), 204
+        elif request.method == "POST":
+            claimid = request.json["claimid"]
+            price = request.json["price"]
+            cursor.execute("UPDATE Claims SET price=%s WHERE claimid=%s",(price,claimid))
+            data = cursor.fetchall()
+            if len(data) == 0:
+                con.commit()
+                return jsonify({"msg": "updated claim"}), 204
+            else:
+                return jsonify({"msg": "Internal Server Error"}), 500
+    except Exception as e:
+        print(e)
+        return jsonify({"msg": "Internal Server Error"}), 500
+    finally:
+        cursor.close()
+        con.close()
+
+@app.route("/api/v1/claims", methods=["GET", "POST"])
 @loginrequired
 def claims():
     try:
@@ -245,21 +320,13 @@ def claims():
         elif request.method == "POST":
             userid = request.json["userid"]
             dcthsid = request.json["dcthsid"]
-            price = request.json.price
-            cursor.execute("INSERT INTO Claims VALUES (%s,%s,%s)",
+            price = request.json["price"]
+            cursor.execute("INSERT INTO Claims(userid,dcthsid,price) VALUES (%s,%s,%s)",
                            (userid, dcthsid, price))
             data = cursor.fetchall()
             if len(data) == 0:
                 con.commit()
                 return jsonify({"msg": "Added Claim"}), 201
-        elif request.method == 'DELETE':
-            dcthsid = request.json["dcthsid"]
-            userid = request.json["userid"]
-            cursor.execute(
-                "DELETE FROM Claim WHERE dcthsid=%s AND userid=%s", (dcthsid, userid))
-            data = cursor.fetchall()
-            if len(data) == 0:
-                return jsonify({"msg": "deleted claim"}), 200
     except Exception as e:
         print(e)
         return jsonify({"msg": "Internal Server Error"}), 500
@@ -267,7 +334,39 @@ def claims():
         cursor.close()
         con.close()
 
-@app.route("/api/v1/transactions", methods=["GET", "POST", "DELETE"])
+
+@app.route("/api/v1/transactions/dp", methods=["GET", "POST"])
+@loginrequired
+def dptransactions():
+    try:
+        con = mysql.connect()
+        cursor = con.cursor()
+        if request.method == 'GET':
+            transactionid = request.args.get("transactionid")
+            cursor.execute(
+                "DELETE FROM Transactions WHERE transactionid=%s", (transactionid))
+            data = cursor.fetchall()
+            if len(data) == 0:
+                con.commit()
+                return jsonify({"msg": "deleted Transaction"}), 204
+        elif request.method == "POST":
+            transactionid = request.json["transactionid"]
+            price = request.json["price"]
+            cursor.execute("UPDATE Transactions SET price=%s WHERE transactionid=%s",(price,transactionid))
+            data = cursor.fetchall()
+            if len(data) == 0:
+                con.commit()
+                return jsonify({"msg": "updated transaction"}), 204
+            else:
+                return jsonify({"msg": "Internal Server Error"}), 500
+    except Exception as e:
+        print(e)
+        return jsonify({"msg": "Internal Server Error"}), 500
+    finally:
+        cursor.close()
+        con.close()    
+
+@app.route("/api/v1/transactions", methods=["GET", "POST"])
 @loginrequired
 def transactions():
     try:
@@ -287,7 +386,7 @@ def transactions():
             data = cursor.fetchall()
             if len(data) == 0:
                 con.commit()
-                return jsonify({"msg": "Added Claim"}), 201
+                return jsonify({"msg": "Added Transaction"}), 201
         elif request.method == 'DELETE':
             userid = request.json["userid"]
             cursor.execute(
