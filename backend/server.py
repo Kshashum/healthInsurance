@@ -81,6 +81,11 @@ def loginrequired(f):
                              "secret", algorithms=["HS256"])
             elif request.method =="GET":
                 decoded=jwt.decode(request.args.get("token"),"secret",algorithms=["HS256"])
+            elif request.method == "DELETE":
+                decoded=jwt.decode(request.args.get("token"),"secret",algorithms=["HS256"])
+            elif request.method == "PUT":
+                decoded = jwt.decode(request.json["token"],
+                             "secret", algorithms=["HS256"])
             if decoded['userid'] is not None:
                 return f(*args, **kwargs)
         except:
@@ -159,20 +164,20 @@ def users():
     finally:
         cursor.close()
         con.close()
-@app.route("/api/v1/dcths/dp", methods=["GET", "POST"])
+@app.route('/api/v1/dcths/<dcthsid>', methods=["DELETE", "PUT"])
 @loginrequired
-def dpdcths():
+def dpdcths(dcthsid):
     try:
         con = mysql.connect()
         cursor = con.cursor()
-        if request.method == 'GET':
+        if request.method == 'DELETE':
             dcthsid = request.args.get("dcthsid")
             cursor.execute("DELETE FROM DctHs WHERE dcthsid=%s", (dcthsid))
             data = cursor.fetchall()
             if len(data) == 0:
                 con.commit()
                 return jsonify({"msg": "deleted Doctor Hospital"}), 204
-        elif request.method == "POST":
+        elif request.method == "PUT":
             name = request.json["name"]
             phone = request.json["phone"]
             state = request.json["state"]
@@ -274,13 +279,13 @@ def deletevisitlist():
         con.close()
 
 
-@app.route("/api/v1/claims/dp", methods=["GET","POST"])
+@app.route('/api/v1/claims/<claimid>', methods=["DELETE","PUT"])
 @loginrequired
-def dpclaims():
+def dpclaims(claimid):
     try:
         con = mysql.connect()
         cursor = con.cursor()
-        if request.method == 'GET':
+        if request.method == 'DELETE':
             claimid = request.args.get("claimid")
             cursor.execute(
                 "DELETE FROM Claims WHERE claimid=%s", (claimid))
@@ -288,7 +293,7 @@ def dpclaims():
             if len(data) == 0:
                 con.commit()
                 return jsonify({"msg": "deleted claim"}), 204
-        elif request.method == "POST":
+        elif request.method == "PUT":
             claimid = request.json["claimid"]
             price = request.json["price"]
             cursor.execute("UPDATE Claims SET price=%s WHERE claimid=%s",(price,claimid))
@@ -335,13 +340,13 @@ def claims():
         con.close()
 
 
-@app.route("/api/v1/transactions/dp", methods=["GET", "POST"])
+@app.route("/api/v1/transactions/<transactionid>", methods=["DELETE","PUT"])
 @loginrequired
-def dptransactions():
+def dptransactions(transactionid):
     try:
         con = mysql.connect()
         cursor = con.cursor()
-        if request.method == 'GET':
+        if request.method == 'DELETE':
             transactionid = request.args.get("transactionid")
             cursor.execute(
                 "DELETE FROM Transactions WHERE transactionid=%s", (transactionid))
@@ -349,7 +354,7 @@ def dptransactions():
             if len(data) == 0:
                 con.commit()
                 return jsonify({"msg": "deleted Transaction"}), 204
-        elif request.method == "POST":
+        elif request.method == "PUT":
             transactionid = request.json["transactionid"]
             price = request.json["price"]
             cursor.execute("UPDATE Transactions SET price=%s WHERE transactionid=%s",(price,transactionid))

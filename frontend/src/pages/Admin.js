@@ -56,7 +56,7 @@ const Admin = () => {
   const handleUpdateclaim = (e) => {
     e.preventDefault();
     axios
-      .post("http://localhost:5000/api/v1/claims/dp", {
+      .put(`http://localhost:5000/api/v1/claims/${claimid1}`, {
         token,
         claimid: claimid1,
         price: price2,
@@ -77,7 +77,7 @@ const Admin = () => {
   const handleDeleteclaim = (e) => {
     e.preventDefault();
     axios
-      .get("http://localhost:5000/api/v1/claims/dp", {
+      .delete(`http://localhost:5000/api/v1/claims/${claimid2}`, {
         params: { token, claimid: claimid2 },
       })
       .then((res) => {
@@ -117,7 +117,7 @@ const Admin = () => {
   const handleUpdateTr = (e) => {
     e.preventDefault();
     axios
-      .post("http://localhost:5000/api/v1/transactions/dp", {
+      .put(`http://localhost:5000/api/v1/transactions/${transactionid1}`, {
         token,
         transactionid: transactionid1,
         price: price4,
@@ -138,7 +138,7 @@ const Admin = () => {
   const handleDeleteTr = (e) => {
     e.preventDefault();
     axios
-      .get("http://localhost:5000/api/v1/transactions/dp", {
+      .delete(`http://localhost:5000/api/v1/transactions/${transactionid2}`, {
         params: { token, transactionid: transactionid2 },
       })
       .then((res) => {
@@ -183,7 +183,7 @@ const Admin = () => {
   const handleUpdateDH = (e) => {
     e.preventDefault();
     axios
-      .post("http://localhost:5000/api/v1/dcths/dp", {
+      .put(`http://localhost:5000/api/v1/dcths/${dcthsid2}`, {
         token,
         dcthsid: dcthsid2,
         name: name2,
@@ -212,7 +212,7 @@ const Admin = () => {
   const handleDeleteDH = (e) => {
     e.preventDefault();
     axios
-      .get("http://localhost:5000/api/v1/dcths/dp", {
+      .delete(`http://localhost:5000/api/v1/dcths/${dcthsid3}`, {
         params: { token, dcthsid: dcthsid3 },
       })
       .then((res) => {
